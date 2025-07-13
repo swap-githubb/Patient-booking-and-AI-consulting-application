@@ -11,6 +11,9 @@ import PatientLogin from './components/Patient/PatientLogin';
 import PatientDashboard from './components/Patient/PatientDashboard';
 import ClinicalConsultation from './components/ClinicalConsultation/ClinicalConsultation';
 
+import PatientProtectedRoute from './components/auth/PatientProtectedRoute';
+import DoctorProtectedRoute from './components/auth/DoctorProtectedRoute';
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -20,11 +23,36 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/doctor/register" element={<DoctorRegister />} />
           <Route path="/doctor/login" element={<DoctorLogin />} />
-          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/patient/register" element={<PatientRegister />} />
           <Route path="/patient/login" element={<PatientLogin />} />
-          <Route path="/patient/dashboard" element={<PatientDashboard />} />
-          <Route path="/patient/consultation" element={<ClinicalConsultation />} />
+
+
+           <Route 
+            path="/doctor/dashboard" 
+            element={
+              <DoctorProtectedRoute>
+                <DoctorDashboard />
+              </DoctorProtectedRoute>
+            } 
+          />
+
+           <Route 
+            path="/patient/dashboard" 
+            element={
+              <PatientProtectedRoute>
+                <PatientDashboard />
+              </PatientProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/patient/consultation" 
+            element={
+              <PatientProtectedRoute>
+                <ClinicalConsultation />
+              </PatientProtectedRoute>
+            } 
+          />
+          
         </Routes>
       </Router>
     </ThemeProvider>
