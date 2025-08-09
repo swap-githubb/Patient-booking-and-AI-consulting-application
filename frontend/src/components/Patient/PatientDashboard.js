@@ -3,7 +3,7 @@ import {
   Container, Grid, Card, CardContent, Typography, Button, TextField, Box, Alert,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Tabs, Tab,
   Dialog, DialogTitle, DialogContent, DialogActions, RadioGroup, FormControlLabel, Radio,
-  AppBar, Toolbar, IconButton, CardActions
+  AppBar, Toolbar, IconButton, CardActions, CircularProgress
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
@@ -17,6 +17,7 @@ import EventBusyIcon from '@mui/icons-material/EventBusy';
 // Subtle SVG background pattern
 const backgroundPattern = `url('data:image/svg+xml,%3Csvg width="52" height="26" viewBox="0 0 52 26" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23d4d4d4" fill-opacity="0.1"%3E%3Cpath d="M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6H10zM42 24c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6h-2c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h-2zM10 24c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6H10z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')`;
 
+
 function PatientDashboard() {
   const [searchCriteria, setSearchCriteria] = useState({ city: '', state: '', speciality: '', name: '' });
   const [doctors, setDoctors] = useState([]);
@@ -28,10 +29,10 @@ function PatientDashboard() {
   const [patientName, setPatientName] = useState(''); 
   const [isBookingOpen, setBookingOpen] = useState(false);
   const [appointmentTab, setAppointmentTab] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const patientToken = localStorage.getItem('patientToken');
-
 
   const handleLogout = () => {
     localStorage.removeItem('patientToken');
@@ -44,10 +45,15 @@ function PatientDashboard() {
   };
 
   const searchDoctors = async () => {
+    setLoading(true);
     try {
       const res = await api.get('/doctors/search', { params: searchCriteria });
       setDoctors(res.data.doctors);
-    } catch (err) { console.error('Search failed', err); }
+    } catch (err) {
+      console.error('Search failed', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchAppointments = useCallback(async () => {
@@ -56,7 +62,6 @@ function PatientDashboard() {
       setAppointments(res.data.appointments);
     } catch (err) { console.error('Failed to fetch appointments', err); }
   }, [patientToken]);
-
 
   useEffect(() => {
     const name = localStorage.getItem('patientName');
@@ -181,7 +186,16 @@ function PatientDashboard() {
               </Grid>
             ))}
             <Grid item xs={12} sm={6} md={2}>
-                <Button variant="contained" onClick={searchDoctors} fullWidth>Search</Button>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Button variant="contained" onClick={searchDoctors} fullWidth disabled={loading} sx={{ mr: loading ? 2 : 0 }}>
+                  Search
+                </Button>
+                {loading && (
+                  <Box sx={{ ml: 1 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                )}
+              </Box>
             </Grid>
           </Grid>
         </Paper>
